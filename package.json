@@ -13,6 +13,7 @@
     "vite": "^8.0.12"
   },
   "dependencies": {
-    "kaboom": "^3000.1.17"
+    "kaboom": "^3000.1.17",
+    "node.js": "^0.0.1-security"
   }
 }
