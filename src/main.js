@@ -2,6 +2,7 @@ import { k } from "./kaBoomCtx";
 import { scaleFactor } from "./constants";
 import { displayDialogue } from "./utils";
 import { setCamScale } from "./utils";
+import { dialogueData } from "./constants";
 k.setBackground(k.Color.fromHex("#1e0022"));
 k.loadSprite("map", "./map.png", );
 
@@ -57,10 +58,11 @@ k.scene("main",async() => {
                     k.pos(boundary.x + mapOffset.x, boundary.y + mapOffset.y),
                     boundary.name
                 ]);
-                if (boundary.name ) {
+                const dialogueText = dialogueData[boundary.name];
+                if (dialogueText) {
                     player.onCollide(boundary.name, () => {
                         player.isInDialogue = true;
-                        displayDialogue("TODO", () => {player.isInDialogue = false;});
+                        displayDialogue(dialogueText, () => {player.isInDialogue = false;});
                     });
                 }
                 
