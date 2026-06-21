@@ -5,8 +5,15 @@ import { setCamScale } from "./utils";
 import { dialogueData } from "./constants";
 k.setBackground(k.Color.fromHex("#1e0022"));
 k.loadSprite("map", "./map.png", );
+k.loadSprite("point-of-interest", "sprites/pointofIntrest.png", {
+    sliceX: 2,
+    sliceY: 2,
+    anims: {
+        pulse: { from: 0, to: 3, speed: 4, loop: true },
+    },
+});
 
-k.loadSprite("player", "sprites/player.png", {
+k.loadSprite("player", "sprites/player (3).png", {
     sliceX: 6,
     sliceY: 10,
     anims: {
@@ -36,7 +43,7 @@ k.scene("main",async() => {
     ]);
     const player = k.make([
         k.sprite("player", {anim: "idle-down"}),
-        k.area({shape: new k.Rect(k.vec2(0, 15), 10, 5)}),
+        k.area({shape: new k.Rect(k.vec2(0, 16), 10, 6)}),
         k.body(),
         k.anchor("center"),
         k.pos(),
@@ -45,6 +52,9 @@ k.scene("main",async() => {
             speed: 250,
             direction: "down",
             isInDialogue: false,
+            isKeyboardMoving: false,
+            activeDialogue: null,
+            closeDialogue: null,
         },
         "player",
     ]);
@@ -60,9 +70,35 @@ k.scene("main",async() => {
                 ]);
                 const dialogueText = dialogueData[boundary.name];
                 if (dialogueText) {
+                    map.add([
+                        k.sprite("point-of-interest", { anim: "pulse" }),
+                        k.pos(
+                            boundary.x + boundary.width / 2 - 3.5 + mapOffset.x,
+                            boundary.y - 24 + mapOffset.y,
+                        ),
+                        k.z(1),
+                        "point-of-interest",
+                    ]);
+
                     player.onCollide(boundary.name, () => {
+                        if (player.activeDialogue === boundary.name) return;
+
+                        player.closeDialogue?.();
+                        player.activeDialogue = boundary.name;
                         player.isInDialogue = true;
-                        displayDialogue(dialogueText, () => {player.isInDialogue = false;});
+                        player.closeDialogue = displayDialogue(dialogueText, () => {
+                            if (player.activeDialogue !== boundary.name) return;
+
+                            player.isInDialogue = false;
+                            player.activeDialogue = null;
+                            player.closeDialogue = null;
+                        });
+                    });
+
+                    player.onCollideEnd(boundary.name, () => {
+                        if (player.activeDialogue === boundary.name) {
+                            player.closeDialogue?.();
+                        }
                     });
                 }
                 
@@ -88,9 +124,40 @@ k.scene("main",async() => {
     k.onResize(() => {setCamScale(k)});
 
     k.onUpdate(() => {
-        k.camPos(player.pos.x ,player.pos.y +100);});
+        k.camPos(player.pos.x ,player.pos.y +100);
+
+        const movement = k.vec2(
+            Number(k.isKeyDown("d")) - Number(k.isKeyDown("a")),
+            Number(k.isKeyDown("s")) - Number(k.isKeyDown("w")),
+        );
+
+        if (movement.x === 0 && movement.y === 0) {
+            if (player.isKeyboardMoving) {
+                player.isKeyboardMoving = false;
+                if (player.direction === "down") player.play("idle-down");
+                else if (player.direction === "up") player.play("idle-up");
+                else player.play("idle-side");
+            }
+            return;
+        }
+
+        player.isKeyboardMoving = true;
+        player.move(movement.unit().scale(player.speed));
+
+        if (movement.y < 0) {
+            if (player.curAnim() !== "walk-up") player.play("walk-up");
+            player.direction = "up";
+        } else if (movement.y > 0) {
+            if (player.curAnim() !== "walk-down") player.play("walk-down");
+            player.direction = "down";
+        } else {
+            player.flipX = movement.x < 0;
+            if (player.curAnim() !== "walk-side") player.play("walk-side");
+            player.direction = movement.x < 0 ? "left" : "right";
+        }
+    });
     k.onMouseDown((MouseBtn) => {
-        if (MouseBtn !== "left"||player.isInDialogue) return;
+        if (MouseBtn !== "left") return;
         const WorldMousePos = k.toWorld(k.mousePos());
         player.moveTo(WorldMousePos, player.speed);
 
@@ -127,6 +194,8 @@ k.scene("main",async() => {
       
     });
     k.onMouseRelease(() => {
+        if (player.isKeyboardMoving) return;
+
         if (player.direction === "down"){
             player.play("idle-down");
             return;
