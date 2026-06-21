@@ -161,16 +161,16 @@ k.scene("main",async() => {
         player.isKeyboardMoving = true;
         player.move(movement.unit().scale(player.speed));
 
-        if (movement.y < 0) {
+        if (movement.x !== 0) {
+            player.flipX = movement.x < 0;
+            if (player.curAnim() !== "walk-side") player.play("walk-side");
+            player.direction = movement.x < 0 ? "left" : "right";
+        } else if (movement.y < 0) {
             if (player.curAnim() !== "walk-up") player.play("walk-up");
             player.direction = "up";
         } else if (movement.y > 0) {
             if (player.curAnim() !== "walk-down") player.play("walk-down");
             player.direction = "down";
-        } else {
-            player.flipX = movement.x < 0;
-            if (player.curAnim() !== "walk-side") player.play("walk-side");
-            player.direction = movement.x < 0 ? "left" : "right";
         }
     });
     k.onMouseDown((MouseBtn) => {
