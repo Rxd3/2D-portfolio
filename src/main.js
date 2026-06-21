@@ -1,5 +1,7 @@
 import { k } from "./kaBoomCtx";
 import { scaleFactor } from "./constants";
+import { displayDialogue } from "./utils";
+import { setCamScale } from "./utils";
 k.setBackground(k.Color.fromHex("#1e0022"));
 k.loadSprite("map", "./map.png", );
 
@@ -58,7 +60,7 @@ k.scene("main",async() => {
                 if (boundary.name ) {
                     player.onCollide(boundary.name, () => {
                         player.isInDialogue = true;
-                        displayDialogue(":toDO", () => {player.isInDialogue = false;});
+                        displayDialogue("TODO", () => {player.isInDialogue = false;});
                     });
                 }
                 
@@ -80,12 +82,58 @@ k.scene("main",async() => {
             }
         }
     }
+    setCamScale(k);
+    k.onResize(() => {setCamScale(k)});
+
     k.onUpdate(() => {
         k.camPos(player.pos.x ,player.pos.y +100);});
     k.onMouseDown((MouseBtn) => {
         if (MouseBtn !== "left"||player.isInDialogue) return;
         const WorldMousePos = k.toWorld(k.mousePos());
         player.moveTo(WorldMousePos, player.speed);
+
+        const mouseAngle = player.pos.angle(WorldMousePos);
+
+        const lowerBound = 50;
+        const upperBound = 125;
+
+        if (mouseAngle >= lowerBound && mouseAngle < upperBound && player.curAnim() !== "walk-up") {
+            player.play("walk-up");
+            player.direction = "up";
+            return;
+        }
+        if (Math.abs(mouseAngle) >= upperBound ) {
+            player.flipX=false;
+            if (player.curAnim() !== "walk-side") {
+                player.play("walk-side");
+            }
+            player.direction = "right";
+            return;
+        }
+        if (mouseAngle >= -upperBound && mouseAngle < -lowerBound && player.curAnim() !== "walk-down") {
+            player.play("walk-down");
+            player.direction = "down";
+            return;
+        }
+         if (Math.abs(mouseAngle) < lowerBound ) {
+            player.flipX=true;
+            if (player.curAnim() !== "walk-side") {
+                player.play("walk-side");
+            }
+            player.direction = "left";
+            return;}
+      
+    });
+    k.onMouseRelease(() => {
+        if (player.direction === "down"){
+            player.play("idle-down");
+            return;
+        }
+        if (player.direction === "up"){
+            player.play("idle-up");
+            return;
+        }
+        player.play("idle-side");
     });
 });
 

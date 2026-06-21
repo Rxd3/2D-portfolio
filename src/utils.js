@@ -1,6 +1,6 @@
 export function displayDialogue(text, onDisplayEnd) {
     const dialogueUI = document.getElementById('textbox-container');
-const dialogue = document.getElementById('dialogue');
+const dialogue = document.getElementById('dialog');
 
 dialogueUI.style.display = 'block';
 
@@ -26,4 +26,15 @@ const intervalRef = setInterval(() => {
     closeBtn.removeEventListener('click', onCloseBtnClick);
     }
     closeBtn.addEventListener('click', onCloseBtnClick);
+}
+export function setCamScale(k) {
+    const resizeFactor = k.width() / k.height() ;
+    if (resizeFactor < 1) {
+        k.camScale(k.vec2(1));
+        return;
+    
+    };
+    k.camScale(k.vec2( 1.5));
+    
+    
 }
