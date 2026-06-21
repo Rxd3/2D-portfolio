@@ -40,28 +40,59 @@
 
       #textbox {
         position:absolute;
-        left:10%;
-        right:10%;
-        bottom:2vh;
+        left: 50%;
+        bottom: 2.25vh;
+        width: min(80vw, 70rem);
         min-height: 10vh;
         max-height: 70dvh;
         box-sizing: border-box;
-        background: white;
-        border-radius: 3px;
-        outline:  solid;
-        padding: 1rem;
+        color: #f7ead7;
+        background:
+          linear-gradient(180deg, rgba(57, 30, 52, 0.98), rgba(24, 13, 31, 0.98));
+        border: 3px solid #d6a24b;
+        border-radius: 6px;
+        padding: 1.1rem 1.2rem 1rem;
         display: flex;
         flex-direction: column;
         flex-wrap: nowrap;
         justify-content: flex-start;
         word-spacing: 0.2rem;
         overflow: hidden;
-        filter: drop-shadow(0px 0px 0.7rem rgb(112, 112, 112));
+        transform: translateX(-50%);
+        box-shadow:
+          0 0 0 3px #43233e,
+          0 8px 0 rgba(10, 4, 15, 0.78),
+          0 16px 32px rgba(5, 2, 10, 0.5),
+          inset 0 1px 0 rgba(255, 232, 178, 0.24);
       }
+
+      #textbox::before,
+      #textbox::after {
+        content: "";
+        position: absolute;
+        top: 0.55rem;
+        width: 0.4rem;
+        height: 0.4rem;
+        background: #f4c86f;
+        box-shadow: 0 0 0 2px #6e4637;
+      }
+
+      #textbox::before {
+        left: 0.6rem;
+      }
+
+      #textbox::after {
+        right: 0.6rem;
+      }
+
       .ui-text {
         width: 100%;
         min-height: 0;
         margin: 0;
+        padding: 0.2rem 0.4rem 0.2rem 0;
+        color: #f7ead7;
+        line-height: 1.28;
+        letter-spacing: 0.015em;
         overflow-y: auto;
         overflow-x: hidden;
         overflow-wrap: anywhere;
@@ -71,17 +102,72 @@
         user-select: none;
       }
 
+      .ui-text strong {
+        color: #ffd77f;
+        font-weight: normal;
+        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+      }
+
+      .ui-text a {
+        color: #8fd8ff;
+        text-decoration-color: #d6a24b;
+        text-underline-offset: 0.12em;
+      }
+
+      .ui-text a:hover,
+      .ui-text a:focus-visible {
+        color: #d6f0ff;
+      }
+
+      .ui-text::-webkit-scrollbar {
+        width: 0.55rem;
+      }
+
+      .ui-text::-webkit-scrollbar-track {
+        background: rgba(10, 4, 15, 0.55);
+        border-radius: 2px;
+      }
+
+      .ui-text::-webkit-scrollbar-thumb {
+        background: #b77b3d;
+        border: 2px solid #24121f;
+        border-radius: 2px;
+      }
+
       .ui-close-btn {
         font-family: monogram, monospace;
-        font-size: inherit;
-        border-style: none;
+        font-size: 0.82em;
+        color: #24121f;
+        background: linear-gradient(180deg, #f4cf78, #c78a3e);
+        border: 2px solid #ffe1a0;
         border-radius: 3px;
-        padding: 1rem;
-       
+        padding: 0.55rem 1.15rem;
+        box-shadow:
+          0 3px 0 #6d3f30,
+          0 5px 10px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        transition: transform 100ms ease, filter 100ms ease, box-shadow 100ms ease;
       }
+
+      .ui-close-btn:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+      }
+
+      .ui-close-btn:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 #6d3f30;
+      }
+
+      .ui-close-btn:focus-visible {
+        outline: 3px solid #8fd8ff;
+        outline-offset: 3px;
+      }
+
       .btn-container {
         align-self: flex-end;
-        margin-top: 1rem;
+        flex: 0 0 auto;
+        margin-top: 0.75rem;
       }
       .note {
         position: absolute;
@@ -103,10 +189,17 @@
           left: 0.75rem;
           right: 0.75rem;
           bottom: max(0.75rem, env(safe-area-inset-bottom));
+          width: auto;
           min-height: 0;
           max-height: 65dvh;
-          padding: 0.8rem;
+          padding: 0.9rem 0.85rem 0.75rem;
           word-spacing: 0.05rem;
+          transform: none;
+          border-width: 2px;
+          box-shadow:
+            0 0 0 2px #43233e,
+            0 5px 0 rgba(10, 4, 15, 0.78),
+            0 10px 24px rgba(5, 2, 10, 0.55);
         }
 
         .ui-text {
@@ -120,7 +213,8 @@
         }
 
         .ui-close-btn {
-          padding: 0.55rem 0.9rem;
+          font-size: 1rem;
+          padding: 0.45rem 0.9rem;
         }
 
         .note {
@@ -129,6 +223,12 @@
           right: 0.75rem;
           font-size: 1.1rem;
           line-height: 1.2;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ui-close-btn {
+          transition: none;
         }
       }
     </style>
