@@ -34,7 +34,7 @@ export function setCamScale(k) {
         return;
     
     };
-    k.camScale(k.vec2( 1.5));
+    k.camScale(k.vec2( 1.2));
     
     
 }
