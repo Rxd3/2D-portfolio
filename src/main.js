@@ -3,8 +3,12 @@ import { scaleFactor } from "./constants";
 import { displayDialogue } from "./utils";
 import { setCamScale } from "./utils";
 import { dialogueData } from "./constants";
+
+const passThroughBoundaryIds = new Set([36]);
+
 k.setBackground(k.Color.fromHex("#1e0022"));
 k.loadSprite("map", "./map.png", );
+k.loadSprite("door", "sprites/door.png");
 k.loadSprite("point-of-interest", "sprites/pointofIntrest.png", {
     sliceX: 2,
     sliceY: 2,
@@ -41,6 +45,14 @@ k.scene("main",async() => {
         k.pos(0),
         k.scale(scaleFactor),
     ]);
+    k.add([
+        k.sprite("door"),
+        k.pos(0),
+        k.scale(scaleFactor),
+        k.z(2),
+        "door-overlay",
+    ]);
+
     const player = k.make([
         k.sprite("player", {anim: "idle-down"}),
         k.area({shape: new k.Rect(k.vec2(0, 16), 10, 6)}),
@@ -48,6 +60,7 @@ k.scene("main",async() => {
         k.anchor("center"),
         k.pos(),
         k.scale(scaleFactor),
+        k.z(1),
         {
             speed: 250,
             direction: "down",
@@ -64,19 +77,23 @@ k.scene("main",async() => {
             for (const boundary of layer.objects) {
                 map.add([
                     k.area({shape: new k.Rect(k.vec2(0), boundary.width, boundary.height)}),
-                    k.body({isStatic: true}),
+                    ...(!passThroughBoundaryIds.has(boundary.id)
+                        ? [k.body({isStatic: true})]
+                        : []),
                     k.pos(boundary.x + mapOffset.x, boundary.y + mapOffset.y),
                     boundary.name
                 ]);
+
                 const dialogueText = dialogueData[boundary.name];
                 if (dialogueText) {
-                    map.add([
+                    k.add([
                         k.sprite("point-of-interest", { anim: "pulse" }),
                         k.pos(
-                            boundary.x + boundary.width / 2 - 3.5 + mapOffset.x,
-                            boundary.y - 24 + mapOffset.y,
+                            (boundary.x + boundary.width / 2 - 3.5 + mapOffset.x) * scaleFactor,
+                            (boundary.y - 24 + mapOffset.y) * scaleFactor,
                         ),
-                        k.z(1),
+                        k.scale(scaleFactor),
+                        k.z(3),
                         "point-of-interest",
                     ]);
 
