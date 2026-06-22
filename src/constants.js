@@ -13,11 +13,15 @@ export const dialogueData = {
 
     "hardware-projects": "<strong>Hardware & systems projects</strong><br>I designed a RISC-V microcontroller SoC with AXI-Lite peripherals, a memory subsystem, and a hardware AI accelerator for embedded Micro Speech inference for the TEKNOFEST Chip Design Competition.<br><br>I also built a portable medicine cooler controlled by a microcontroller programmed in Assembly, and designed a complete multi-site hospital network in Cisco Packet Tracer with routing, VLANs, ACLs, IP addressing, and inter-site connectivity.",
 
+    water: "<strong>Oh</strong><br>i do need to take a shower sometimes.",
+
     cook: "<strong>Technical toolkit</strong><br><strong>Programming:</strong> Python, C, C++, SQL, JavaScript, React Native, and Assembly.<br><strong>Tools & technologies:</strong> Git, TensorFlow, Unity, Blender, Fusion 360, n8n, and Canva.",
 
     food: "<strong>Languages & certifications</strong><br>I speak English, Turkish, and Arabic.<br><br>My certifications include Claude 101, Model Context Protocol by Anthropic, and the Python Pro Bootcamp from Udemy.",
 
-    bed: "<strong>Interests</strong><br>Outside individual projects, I enjoy software development, robotics, AI applications, automation, and 3D modeling—especially work that connects software with real-world systems.",
+    intrests : "<strong>Interests</strong><br>Outside individual projects, I enjoy software development, robotics, AI applications, automation, and 3D modeling—especially work that connects software with real-world systems.",
+    
+    bed: "<strong>A bed??</strong><br>programers do not sleep",
 
     CV: "<strong>Let's connect</strong><br>Email: <a href='mailto:Resitisaoglu@gmail.com'>Resitisaoglu@gmail.com</a><br>Phone: <a href='tel:+905314969317'>+90 531 496 9317</a><br><a href='https://github.com/Rxd3' target='_blank' rel='noopener noreferrer'>GitHub</a> · <a href='https://www.linkedin.com/in/rasit-isaoglu-538577322' target='_blank' rel='noopener noreferrer'>LinkedIn</a><br><br><a href='./Rasit_Isaoglu_Resume.pdf' download='Rasit_Isaoglu_Resume.pdf'>Download my resume (PDF)</a>",
 };

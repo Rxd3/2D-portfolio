@@ -7,7 +7,7 @@ import { dialogueData } from "./constants";
 const passThroughBoundaryIds = new Set([36]);
 
 k.setBackground(k.Color.fromHex("#1e0022"));
-k.loadSprite("map", "./map.png", );
+k.loadSprite("map", "./map1.png", );
 k.loadSprite("door", "sprites/door.png");
 k.loadSprite("point-of-interest", "sprites/pointofIntrest.png", {
     sliceX: 2,
