@@ -324,17 +324,6 @@ img {
     linear-gradient(180deg, rgba(6, 11, 18, 0.99) 0%, rgba(9, 13, 18, 0.97) 54%, var(--ink) 100%);
 }
 
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 28%;
-  z-index: -1;
-  opacity: 0.58;
-  background:
-    linear-gradient(150deg, transparent 0 30%, rgba(11, 17, 18, 0.95) 30.3% 48%, transparent 48.3%) 0 100% / 280px 160px repeat-x,
-    linear-gradient(30deg, transparent 0 35%, #101510 35.2% 58%, transparent 58.3%) 110px 100% / 340px 180px repeat-x;
-}
 
 .star-field {
   position: absolute;

@@ -17,7 +17,7 @@ let parallaxFrame = null;
 function createStarField() {
   if (!starField) return;
 
-  const starCount = compactStarsQuery.matches ? 45 : 300;
+  const starCount = compactStarsQuery.matches ? 100 : 300;
   const stars = document.createDocumentFragment();
 
   for (let index = 0; index < starCount; index += 1) {
@@ -31,7 +31,7 @@ function createStarField() {
     star.style.setProperty("--star-y", `${(Math.random() * 100).toFixed(2)}%`);
     star.style.setProperty("--star-size", `${size.toFixed(2)}px`);
     star.style.setProperty("--star-glow", `${(size * 3).toFixed(2)}px`);
-    star.style.setProperty("--star-duration", `${duration.toFixed(2)}s`);
+    star.style.setProperty("--star-duration", `${duration.toFixed(1)}s`);
     star.style.setProperty("--star-delay", `${(-Math.random() * duration).toFixed(2)}s`);
     star.style.setProperty("--star-peak", (0.58 + Math.random() * 0.42).toFixed(2));
     star.style.setProperty(
