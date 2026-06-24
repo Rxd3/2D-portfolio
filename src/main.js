@@ -3,6 +3,8 @@ import { scaleFactor } from "./constants";
 import { displayDialogue } from "./utils";
 import { setCamScale } from "./utils";
 import { dialogueData } from "./constants";
+import "./styles.css";
+import "./portfolio";
 
 const passThroughBoundaryIds = new Set([36]);
 

@@ -2,250 +2,282 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>proto2d</title>
+    <meta name="description" content="Rasit Isaoglu — Computer Engineering student building practical systems across hardware, software, and machine learning." />
+    <meta name="theme-color" content="#120e0b" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2324160f'/%3E%3Cpath d='M8 8h48v40L32 58 8 48z' fill='none' stroke='%23c28b4b' stroke-width='4'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-family='monospace' font-size='24' font-weight='700' fill='%23ffd66b'%3ERI%3C/text%3E%3C/svg%3E" />
+    <title>Rasit Isaoglu — Computer Engineer</title>
   </head>
   <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <style>
-      @font-face {
-        font-family: monogram;
-        src: url("monogram.ttf") ;
-      }
+    <header class="site-header" data-header>
+      <nav class="nav-shell" aria-label="Primary navigation">
+        <a class="brand" href="#home" aria-label="Rasit Isaoglu, home">
+          <span class="brand-mark" aria-hidden="true">RI</span>
+          <span class="brand-name">Rasit Isaoglu</span>
+        </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="nav-links" data-menu-toggle>
+          <span></span><span></span><span></span>
+          <span class="sr-only">Toggle menu</span>
+        </button>
+        <div class="nav-links" id="nav-links" data-nav-links>
+          <a href="#home">Home</a>
+          <a href="#about">About</a>
+          <a href="#house">House</a>
+          <a href="#projects">Projects</a>
+          <a href="#experience">Experience</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <button class="pixel-button pixel-button--small nav-cta" type="button" data-enter-house>
+          Enter House <span aria-hidden="true">→</span>
+        </button>
+      </nav>
+    </header>
 
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-      }
-
-      body{font-family: monogram, monospace;
-        font-size: 2.5rem;
-        overflow: hidden;
-      }
-
-
-      #app {
-        width: 100%;
-        height: 100dvh;
-        margin: 0;
-        position: relative;
-      }
-
-      #game {
-        display: block;
-      }
-
-      #textbox {
-        position:absolute;
-        left: 50%;
-        bottom: 2.25vh;
-        width: min(80vw, 70rem);
-        min-height: 10vh;
-        max-height: 70dvh;
-        box-sizing: border-box;
-        color: #f7ead7;
-        background:
-          linear-gradient(180deg, rgba(57, 30, 52, 0.98), rgba(24, 13, 31, 0.98));
-        border: 3px solid #d6a24b;
-        border-radius: 6px;
-        padding: 1.1rem 1.2rem 1rem;
-        display: flex;
-        flex-direction: column;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        word-spacing: 0.2rem;
-        overflow: hidden;
-        transform: translateX(-50%);
-        box-shadow:
-          0 0 0 3px #43233e,
-          0 8px 0 rgba(10, 4, 15, 0.78),
-          0 16px 32px rgba(5, 2, 10, 0.5),
-          inset 0 1px 0 rgba(255, 232, 178, 0.24);
-      }
-
-      #textbox::before,
-      #textbox::after {
-        content: "";
-        position: absolute;
-        top: 0.55rem;
-        width: 0.4rem;
-        height: 0.4rem;
-        background: #f4c86f;
-        box-shadow: 0 0 0 2px #6e4637;
-      }
-
-      #textbox::before {
-        left: 0.6rem;
-      }
-
-      #textbox::after {
-        right: 0.6rem;
-      }
-
-      .ui-text {
-        width: 100%;
-        min-height: 0;
-        margin: 0;
-        padding: 0.2rem 0.4rem 0.2rem 0;
-        color: #f7ead7;
-        line-height: 1.28;
-        letter-spacing: 0.015em;
-        overflow-y: auto;
-        overflow-x: hidden;
-        overflow-wrap: anywhere;
-        overscroll-behavior: contain;
-        touch-action: pan-y;
-        -webkit-overflow-scrolling: touch;
-        user-select: none;
-      }
-
-      .ui-text strong {
-        color: #ffd77f;
-        font-weight: normal;
-        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
-      }
-
-      .ui-text a {
-        color: #8fd8ff;
-        text-decoration-color: #d6a24b;
-        text-underline-offset: 0.12em;
-      }
-
-      .ui-text a:hover,
-      .ui-text a:focus-visible {
-        color: #d6f0ff;
-      }
-
-      .ui-text::-webkit-scrollbar {
-        width: 0.55rem;
-      }
-
-      .ui-text::-webkit-scrollbar-track {
-        background: rgba(10, 4, 15, 0.55);
-        border-radius: 2px;
-      }
-
-      .ui-text::-webkit-scrollbar-thumb {
-        background: #b77b3d;
-        border: 2px solid #24121f;
-        border-radius: 2px;
-      }
-
-      .ui-close-btn {
-        font-family: monogram, monospace;
-        font-size: 0.82em;
-        color: #24121f;
-        background: linear-gradient(180deg, #f4cf78, #c78a3e);
-        border: 2px solid #ffe1a0;
-        border-radius: 3px;
-        padding: 0.55rem 1.15rem;
-        box-shadow:
-          0 3px 0 #6d3f30,
-          0 5px 10px rgba(0, 0, 0, 0.3);
-        cursor: pointer;
-        transition: transform 100ms ease, filter 100ms ease, box-shadow 100ms ease;
-      }
-
-      .ui-close-btn:hover {
-        filter: brightness(1.08);
-        transform: translateY(-1px);
-      }
-
-      .ui-close-btn:active {
-        transform: translateY(2px);
-        box-shadow: 0 1px 0 #6d3f30;
-      }
-
-      .ui-close-btn:focus-visible {
-        outline: 3px solid #8fd8ff;
-        outline-offset: 3px;
-      }
-
-      .btn-container {
-        align-self: flex-end;
-        flex: 0 0 auto;
-        margin-top: 0.75rem;
-      }
-      .note {
-        position: absolute;
-        top: 1vh;
-        left: 5%;
-       display:flex;
-       flex-direction: column;
-       color: rgb(238, 238, 238);
-       user-select: none;
-      }
-
-      @media (max-width: 600px) {
-        body {
-          font-size: 1.4rem;
-          line-height: 1.3;
-        }
-
-        #textbox {
-          left: 0.75rem;
-          right: 0.75rem;
-          bottom: max(0.75rem, env(safe-area-inset-bottom));
-          width: auto;
-          min-height: 0;
-          max-height: 65dvh;
-          padding: 0.9rem 0.85rem 0.75rem;
-          word-spacing: 0.05rem;
-          transform: none;
-          border-width: 2px;
-          box-shadow:
-            0 0 0 2px #43233e,
-            0 5px 0 rgba(10, 4, 15, 0.78),
-            0 10px 24px rgba(5, 2, 10, 0.55);
-        }
-
-        .ui-text {
-          line-height: 1.35;
-          padding-right: 0.25rem;
-        }
-
-        .btn-container {
-          flex: 0 0 auto;
-          margin-top: 0.6rem;
-        }
-
-        .ui-close-btn {
-          font-size: 1rem;
-          padding: 0.45rem 0.9rem;
-        }
-
-        .note {
-          top: max(0.5rem, env(safe-area-inset-top));
-          left: 0.75rem;
-          right: 0.75rem;
-          font-size: 1.1rem;
-          line-height: 1.2;
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .ui-close-btn {
-          transition: none;
-        }
-      }
-    </style>
-      
-    <div id="app">
-      <div id="ui">
-        <p class="note">tap/click around to move or use WASD</p>
-          <div id="textbox-container" style="display: none;">
-              <div id ="textbox"><p id="dialog" class="ui-text"></p>
-                <div class="btn-container">
-                  <button id="close" class="ui-close-btn">close</button>
-                </div>
-               </div>
+    <main id="main-content">
+      <section class="hero" id="home" aria-labelledby="hero-title">
+        <div class="star-field" aria-hidden="true"></div>
+        <div class="hero-shell section-shell">
+          <div class="hero-copy reveal">
+            <h1 id="hero-title">Rasit<br />Isaoglu</h1>
+            <p class="hero-role">Computer Engineering Student</p>
+            <p class="hero-disciplines">Hardware <i></i> Software <i></i> Machine Learning <i></i> Research</p>
+            <p class="hero-intro">I build practical systems that connect software, hardware, and intelligent models.</p>
+            <div class="hero-actions">
+              <button class="pixel-button" type="button" data-enter-house>
+                Enter Interactive House <span aria-hidden="true">→</span>
+              </button>
+              <a class="pixel-button pixel-button--dark" href="#projects">View Projects <span aria-hidden="true">↓</span></a>
+              <a class="pixel-button pixel-button--ghost" href="./Rasit_Isaoglu_Resume.pdf" download>Download CV <span aria-hidden="true">⇩</span></a>
+            </div>
           </div>
+
+          <div class="hero-visual reveal" aria-label="Pixel-art preview of Rasit's interactive portfolio house">
+            <div class="moon" aria-hidden="true"></div>
+            <div class="house-frame">
+              <div class="house-window house-window--one"><span></span></div>
+              <div class="house-window house-window--two"><span></span></div>
+              <img src="./map1.png" alt="Top-down pixel-art rooms from Rasit's interactive portfolio" />
+              <div class="map-pulse map-pulse--one" aria-hidden="true"></div>
+              <div class="map-pulse map-pulse--two" aria-hidden="true"></div>
+            </div>
+            <div class="visual-caption"><span>Interactive house</span><strong>WASD or click to explore</strong></div>
+          </div>
+        </div>
+        <a class="scroll-cue" href="#about" aria-label="Scroll to About"><span></span></a>
+      </section>
+
+      <section class="about framed-section" id="about" aria-labelledby="about-title">
+        <div class="section-shell about-grid">
+          <div class="character-card reveal" aria-hidden="true">
+            <div class="character-room">
+              <img class="character-sprite" src="./rasit-pixel-portrait.png" alt="" />
+            </div>
+            <span class="character-name">Character profile · Rasit</span>
+          </div>
+          <div class="parchment reveal">
+            <div class="section-heading section-heading--dark">
+              <span class="heading-rule" aria-hidden="true"></span>
+              <h2 id="about-title">About Me</h2>
+              <span class="heading-rule" aria-hidden="true"></span>
+            </div>
+            <p>I am a Computer Engineering student interested in embedded systems, hardware design, software development, and machine learning research.</p>
+            <p>My work connects low-level systems, verification, full-stack development, and AI-based solutions. I enjoy turning ideas into systems that are technically strong, useful, and clear.</p>
+            <div class="profile-skills" aria-label="Core technologies">
+              <span>SystemVerilog</span><span>RISC-V</span><span>Python</span><span>React</span><span>PyTorch</span><span>Node.js</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="house-preview" id="house" aria-labelledby="house-title">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="house-title">Explore My Portfolio House</h2><p>Walk through a pixel-art house where every room reveals a different part of my work.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+
+          <div class="house-stage reveal">
+            <div class="room-label room-label--about"><strong>Living Room</strong><span>About Me</span></div>
+            <div class="room-label room-label--hardware"><strong>Garage</strong><span>Hardware Projects</span></div>
+            <div class="room-label room-label--research"><strong>Lab</strong><span>ML & Research</span></div>
+            <div class="room-label room-label--software"><strong>Office</strong><span>Software Projects</span></div>
+            <div class="room-label room-label--experience"><strong>Kitchen</strong><span>Experience</span></div>
+            <div class="room-label room-label--contact"><strong>Mailbox</strong><span>Contact</span></div>
+            <img src="./map1.png" alt="Full map of the interactive portfolio house, including living room, garage, lab, office, kitchen, and contact room" />
+          </div>
+          <div class="centered-action reveal">
+            <button class="pixel-button pixel-button--large" type="button" data-enter-house>Enter the House <span aria-hidden="true">→</span></button>
+            <span>Use WASD, arrow keys, or click where you want to go.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="paths framed-section" id="projects" aria-labelledby="paths-title">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="paths-title">Choose Your Path</h2><p>Explore the disciplines behind my work.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+          <div class="path-rail">
+            <article class="path-station reveal">
+              <div class="station-scene station-scene--hardware" aria-hidden="true"><span>01</span><i></i></div>
+              <h3>Hardware & Embedded</h3><p>RISC-V, MCU, FPGA, UART, GPIO and verification.</p>
+              <a href="#featured">View Projects <span aria-hidden="true">→</span></a>
+            </article>
+            <article class="path-station reveal">
+              <div class="station-scene station-scene--software" aria-hidden="true"><span>&lt;/&gt;</span><i></i></div>
+              <h3>Software Projects</h3><p>Web apps, tools, dashboards and full-stack systems.</p>
+              <a href="#featured">View Projects <span aria-hidden="true">→</span></a>
+            </article>
+            <article class="path-station reveal">
+              <div class="station-scene station-scene--ml" aria-hidden="true"><span>AI</span><i></i></div>
+              <h3>Machine Learning</h3><p>Models, datasets and practical AI-based solutions.</p>
+              <a href="#featured">View Projects <span aria-hidden="true">→</span></a>
+            </article>
+            <article class="path-station reveal">
+              <div class="station-scene station-scene--research" aria-hidden="true"><span>§</span><i></i></div>
+              <h3>Research</h3><p>Academic work, privacy, experiments and evaluation.</p>
+              <a href="#research">View Research <span aria-hidden="true">→</span></a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="featured" id="featured" aria-labelledby="featured-title">
+        <div class="section-shell section-shell--narrow">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="featured-title">Featured Projects</h2><p>A selection of work across hardware, software, and machine learning.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+
+          <div class="quest-list">
+            <article class="quest-card reveal">
+              <div class="quest-icon quest-icon--chip" aria-hidden="true"><span>RV</span></div>
+              <div class="quest-copy"><p class="quest-type">Hardware / verification</p><h3>RISC-V MCU SoC</h3><p>A microcontroller SoC with AXI-Lite peripherals, a memory subsystem, and a hardware AI accelerator for embedded Micro Speech inference.</p><div class="tag-row"><span>SystemVerilog</span><span>RISC-V</span><span>AXI</span><span>Verification</span></div></div>
+              <div class="quest-actions"><a class="text-link" href="#experience">View Details <span>→</span></a><a class="text-link text-link--muted" href="https://github.com/Rxd3" target="_blank" rel="noopener noreferrer">GitHub <span>↗</span></a></div>
+            </article>
+            <article class="quest-card reveal">
+              <div class="quest-icon quest-icon--house" aria-hidden="true"><span>⌂</span></div>
+              <div class="quest-copy"><p class="quest-type">Web / creative development</p><h3>Interactive Portfolio House</h3><p>A room-based pixel-art portfolio built with Kaboom.js, where visitors explore projects and experience as a playable space.</p><div class="tag-row"><span>JavaScript</span><span>Kaboom.js</span><span>Pixel Art</span></div></div>
+              <div class="quest-actions"><button class="text-link" type="button" data-enter-house>Open Project <span>→</span></button><a class="text-link text-link--muted" href="https://github.com/Rxd3" target="_blank" rel="noopener noreferrer">GitHub <span>↗</span></a></div>
+            </article>
+            <article class="quest-card reveal">
+              <div class="quest-icon quest-icon--brain" aria-hidden="true"><span>ML</span></div>
+              <div class="quest-copy"><p class="quest-type">Machine learning / research</p><h3>Privacy-Aware Synthetic Data</h3><p>Research evaluating privacy-adversarial synthetic data generation with GAN and VAE models, accuracy measures, and FID metrics.</p><div class="tag-row"><span>Python</span><span>PyTorch</span><span>Privacy</span><span>Evaluation</span></div></div>
+              <div class="quest-actions"><a class="text-link" href="#research">View Research <span>→</span></a><a class="text-link text-link--muted" href="https://github.com/Rxd3" target="_blank" rel="noopener noreferrer">GitHub <span>↗</span></a></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="experience framed-section" id="experience" aria-labelledby="experience-title">
+        <div class="section-shell section-shell--narrow">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="experience-title">Experience</h2><p>A quest log of teams, work, and technical challenges.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+          <div class="quest-board reveal" data-accordion>
+            <article class="experience-item is-open">
+              <button type="button" aria-expanded="true"><span class="expand-icon" aria-hidden="true">−</span><time>2026</time><strong>Verification & System Test</strong><em>Fusion MCU · TEKNOFEST Team</em></button>
+              <div class="experience-detail"><p>Developing verification planning, self-checking testbenches, UART/GPIO testing, AXI-Lite peripheral validation, and RISC-V core verification strategy.</p></div>
+            </article>
+            <article class="experience-item">
+              <button type="button" aria-expanded="false"><span class="expand-icon" aria-hidden="true">+</span><time>2025</time><strong>Automation & Lead Systems</strong><em>Pwrlink Marketing Agency</em></button>
+              <div class="experience-detail"><p>Built n8n automation workflows and a lead-generation system that collected more than 5,000 prospects and supported AI-personalized outreach.</p></div>
+            </article>
+            <article class="experience-item">
+              <button type="button" aria-expanded="false"><span class="expand-icon" aria-hidden="true">+</span><time>2022—Now</time><strong>Judge & Coordinator</strong><em>RoboZone</em></button>
+              <div class="experience-detail"><p>Evaluated 200+ robotics and programming projects across four annual international school competitions.</p></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="skills" id="skills" aria-labelledby="skills-title">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="skills-title">Skill Inventory</h2><p>The technologies I carry from one build to the next.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+          <div class="inventory reveal">
+            <div class="inventory-row"><h3>Hardware</h3><div><span>SystemVerilog</span><span>RISC-V</span><span>AXI</span><span>UART</span><span>GPIO</span><span>FPGA</span></div></div>
+            <div class="inventory-row"><h3>Software</h3><div><span>React</span><span>Node.js</span><span>JavaScript</span><span>SQL</span><span>PostgreSQL</span><span>MongoDB</span></div></div>
+            <div class="inventory-row"><h3>Machine Learning</h3><div><span>Python</span><span>PyTorch</span><span>TensorFlow</span><span>Data Analysis</span></div></div>
+            <div class="inventory-row"><h3>Tools</h3><div><span>Git</span><span>Linux</span><span>Docker</span><span>Unity</span><span>Blender</span><span>n8n</span></div></div>
+            <div class="inventory-chest" aria-hidden="true"><i></i><span>Toolkit</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="research framed-section" id="research" aria-labelledby="research-title">
+        <div class="section-shell section-shell--narrow">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="research-title">Research & Publications</h2><p>Experiments built for careful questions and measurable answers.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+          <article class="research-study reveal">
+            <div class="library-scene" aria-hidden="true"><div class="shelf shelf--one"></div><div class="shelf shelf--two"></div><div class="candle"><i></i></div><div class="open-book">∫</div></div>
+            <div class="research-scroll"><p class="quest-type">Current research</p><h3>Privacy-Aware Synthetic Data Evaluation</h3><p>A research-focused exploration of differential privacy and privacy-adversarial synthetic data generation, evaluating GAN and VAE models through accuracy and FID metrics.</p><div class="tag-row"><span>Privacy</span><span>Synthetic Data</span><span>Machine Learning</span><span>Evaluation</span></div><div class="research-actions"><a class="pixel-button pixel-button--dark" href="mailto:Resitisaoglu@gmail.com?subject=Research%20paper%20request">Request Paper</a><a class="text-link" href="#contact">Discuss Research <span>→</span></a></div></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="contact" id="contact" aria-labelledby="contact-title">
+        <div class="section-shell section-shell--narrow">
+          <div class="section-heading reveal">
+            <span class="heading-rule" aria-hidden="true"></span>
+            <div><h2 id="contact-title">Contact Me</h2><p>Interested in my work or want to collaborate? Send a letter.</p></div>
+            <span class="heading-rule" aria-hidden="true"></span>
+          </div>
+          <div class="contact-grid">
+            <div class="writing-desk reveal">
+              <div class="mailbox" aria-hidden="true"><span>RI</span></div>
+              <div class="letter-card"><span>To new ideas,</span><strong>let's build something useful.</strong></div>
+              <div class="contact-links"><a href="mailto:Resitisaoglu@gmail.com">Email <span>↗</span></a><a href="https://www.linkedin.com/in/rasit-isaoglu-538577322" target="_blank" rel="noopener noreferrer">LinkedIn <span>↗</span></a><a href="https://github.com/Rxd3" target="_blank" rel="noopener noreferrer">GitHub <span>↗</span></a></div>
+            </div>
+            <form class="contact-form reveal" data-contact-form>
+              <label for="name">Your Name</label><input id="name" name="name" type="text" autocomplete="name" placeholder="Enter your name" required />
+              <label for="email">Email Address</label><input id="email" name="email" type="email" autocomplete="email" placeholder="Enter your email" required />
+              <label for="message">Your Message</label><textarea id="message" name="message" rows="6" placeholder="Write your message here..." required></textarea>
+              <button class="pixel-button pixel-button--large" type="submit">Send Letter <span aria-hidden="true">→</span></button>
+              <p class="form-status" role="status" data-form-status></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-campfire" aria-hidden="true"><i></i></div>
+      <div><strong>© 2026 Rasit Isaoglu</strong><span>Built as a pixel-art portfolio experience.</span></div>
+      <div class="footer-links"><a href="https://github.com/Rxd3" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/rasit-isaoglu-538577322" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:Resitisaoglu@gmail.com">Email</a></div>
+    </footer>
+
+    <aside class="game-overlay" aria-hidden="true" data-game-overlay>
+      <div class="game-toolbar">
+        <div><span class="game-status-dot" aria-hidden="true"></span><strong>Portfolio House</strong><small>Explore the glowing markers</small></div>
+        <p>Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or click</p>
+        <button type="button" data-close-house>Exit House <span aria-hidden="true">×</span></button>
       </div>
-      <canvas id="game" ></canvas>
-    </div>
+      <div id="game-app">
+        <div id="ui">
+          <p class="game-note">Find the glowing markers to discover my work.</p>
+          <div id="textbox-container" hidden>
+            <div id="textbox"><p id="dialog" class="ui-text"></p><div class="btn-container"><button id="close" class="ui-close-btn">Continue exploring</button></div></div>
+          </div>
+        </div>
+        <canvas id="game"></canvas>
+      </div>
+    </aside>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

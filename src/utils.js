@@ -3,7 +3,7 @@ export function displayDialogue(text, onDisplayEnd) {
     const dialogue = document.getElementById('dialog');
     const closeBtn = document.getElementById('close');
 
-    dialogueUI.style.display = 'block';
+    dialogueUI.hidden = false;
 
     let index = 0;
     let currentText = '';
@@ -22,7 +22,7 @@ export function displayDialogue(text, onDisplayEnd) {
         if (isClosed) return;
 
         isClosed = true;
-        dialogueUI.style.display = 'none';
+        dialogueUI.hidden = true;
         dialogue.innerHTML = '';
         clearInterval(intervalRef);
         closeBtn.removeEventListener('click', closeDialogue);
