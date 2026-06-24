@@ -6,8 +6,69 @@ const closeHouseButton = document.querySelector("[data-close-house]");
 const enterHouseButtons = document.querySelectorAll("[data-enter-house]");
 const contactForm = document.querySelector("[data-contact-form]");
 const formStatus = document.querySelector("[data-form-status]");
+const hero = document.querySelector(".hero");
+const starField = document.querySelector(".star-field");
+const compactStarsQuery = window.matchMedia("(max-width: 780px)");
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let previousFocus = null;
+let parallaxFrame = null;
+
+function createStarField() {
+  if (!starField) return;
+
+  const starCount = compactStarsQuery.matches ? 45 : 300;
+  const stars = document.createDocumentFragment();
+
+  for (let index = 0; index < starCount; index += 1) {
+    const star = document.createElement("i");
+    const duration = 2.4 + Math.random() * 4.1;
+    const size = 1 + Math.random() * 2;
+    const colorRoll = Math.random();
+
+    star.className = "star";
+    star.style.setProperty("--star-x", `${(Math.random() * 100).toFixed(2)}%`);
+    star.style.setProperty("--star-y", `${(Math.random() * 100).toFixed(2)}%`);
+    star.style.setProperty("--star-size", `${size.toFixed(2)}px`);
+    star.style.setProperty("--star-glow", `${(size * 3).toFixed(2)}px`);
+    star.style.setProperty("--star-duration", `${duration.toFixed(2)}s`);
+    star.style.setProperty("--star-delay", `${(-Math.random() * duration).toFixed(2)}s`);
+    star.style.setProperty("--star-peak", (0.58 + Math.random() * 0.42).toFixed(2));
+    star.style.setProperty(
+      "--star-color",
+      colorRoll > 0.92 ? "#ffd66b" : colorRoll < 0.08 ? "#9fc7d6" : "#f2e3c6",
+    );
+    stars.append(star);
+  }
+
+  starField.replaceChildren(stars);
+}
+
+function resetHeroParallax() {
+  hero?.style.setProperty("--star-shift-x", "0px");
+  hero?.style.setProperty("--star-shift-y", "0px");
+}
+
+function updateHeroParallax(event) {
+  if (!hero || compactStarsQuery.matches || reducedMotionQuery.matches) return;
+
+  const bounds = hero.getBoundingClientRect();
+  const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 16;
+  const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 16;
+
+  if (parallaxFrame) cancelAnimationFrame(parallaxFrame);
+  parallaxFrame = requestAnimationFrame(() => {
+    hero.style.setProperty("--star-shift-x", `${x.toFixed(2)}px`);
+    hero.style.setProperty("--star-shift-y", `${y.toFixed(2)}px`);
+    parallaxFrame = null;
+  });
+}
+
+createStarField();
+compactStarsQuery.addEventListener("change", createStarField);
+reducedMotionQuery.addEventListener("change", resetHeroParallax);
+hero?.addEventListener("pointermove", updateHeroParallax, { passive: true });
+hero?.addEventListener("pointerleave", resetHeroParallax);
 
 function setHeaderState() {
   header?.classList.toggle("is-scrolled", window.scrollY > 20);
@@ -89,7 +150,12 @@ const revealObserver = new IntersectionObserver(
   { threshold: 0.12, rootMargin: "0px 0px -4%" },
 );
 
-document.querySelectorAll(".reveal").forEach((element) => revealObserver.observe(element));
+document.querySelectorAll("main section").forEach((section) => {
+  section.querySelectorAll(".reveal").forEach((element, index) => {
+    element.style.setProperty("--reveal-delay", `${Math.min(index * 70, 280)}ms`);
+    revealObserver.observe(element);
+  });
+});
 
 const sections = [...document.querySelectorAll("main section[id]")];
 const navAnchors = [...document.querySelectorAll(".nav-links a")];
@@ -124,4 +190,3 @@ contactForm?.addEventListener("submit", (event) => {
   formStatus.textContent = "Your letter is ready — opening your email app…";
   window.location.href = `mailto:Resitisaoglu@gmail.com?subject=${subject}&body=${body}`;
 });
-
