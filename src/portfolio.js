@@ -9,6 +9,7 @@ const formStatus = document.querySelector("[data-form-status]");
 const hero = document.querySelector(".hero");
 const starField = document.querySelector(".star-field");
 const gameNote = document.querySelector("[data-game-note]");
+const portraitReveals = document.querySelectorAll("[data-portrait-reveal]");
 const backgroundElements = document.querySelectorAll("body > header, body > main, body > footer");
 const compactStarsQuery = window.matchMedia("(max-width: 780px)");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -72,6 +73,38 @@ compactStarsQuery.addEventListener("change", createStarField);
 reducedMotionQuery.addEventListener("change", resetHeroParallax);
 hero?.addEventListener("pointermove", updateHeroParallax, { passive: true });
 hero?.addEventListener("pointerleave", resetHeroParallax);
+
+portraitReveals.forEach((portrait) => {
+  let portraitFrame = null;
+
+  const updatePortraitReveal = (event) => {
+    if (event.pointerType === "touch") return;
+
+    const bounds = portrait.getBoundingClientRect();
+    const revealX = Math.min(Math.max(event.clientX - bounds.left, 0), bounds.width);
+    const revealY = Math.min(Math.max(event.clientY - bounds.top, 0), bounds.height);
+
+    if (portraitFrame) cancelAnimationFrame(portraitFrame);
+    portraitFrame = requestAnimationFrame(() => {
+      portrait.style.setProperty("--portrait-reveal-x", `${revealX.toFixed(1)}px`);
+      portrait.style.setProperty("--portrait-reveal-y", `${revealY.toFixed(1)}px`);
+      portraitFrame = null;
+    });
+  };
+
+  portrait.addEventListener("pointerenter", (event) => {
+    if (event.pointerType === "touch") return;
+    updatePortraitReveal(event);
+    portrait.classList.add("is-revealing");
+  });
+  portrait.addEventListener("pointermove", updatePortraitReveal, { passive: true });
+  portrait.addEventListener("pointerleave", () => {
+    portrait.classList.remove("is-revealing");
+  });
+  portrait.addEventListener("pointercancel", () => {
+    portrait.classList.remove("is-revealing");
+  });
+});
 
 function setHeaderState() {
   header?.classList.toggle("is-scrolled", window.scrollY > 20);

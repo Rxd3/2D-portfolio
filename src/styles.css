@@ -4,6 +4,18 @@
   font-display: swap;
 }
 
+@property --portrait-reveal-radius {
+  syntax: "<length-percentage>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --portrait-reveal-feather {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 :root {
   color-scheme: dark;
   --ink: #120e0b;
@@ -231,7 +243,10 @@ img {
 .pixel-button {
   --button-bg: linear-gradient(180deg, #f0bd4d, #c88a2f);
   --button-color: #21140c;
+  --button-edge: #f6d883;
+  --button-shadow: #3d2617;
   position: relative;
+  isolation: isolate;
   min-height: 48px;
   padding: 11px 22px;
   display: inline-flex;
@@ -239,47 +254,70 @@ img {
   justify-content: center;
   gap: 12px;
   color: var(--button-color);
-  background: var(--button-bg);
-  border: 2px solid #f6d883;
-  box-shadow: 0 0 0 3px #57351f, 0 6px 0 #3d2617, 0 10px 24px rgba(0, 0, 0, 0.34), inset 0 0 0 1px rgba(67, 38, 17, 0.55);
+  background: transparent;
+  border: 0;
   font-family: var(--pixel);
   font-size: 19px;
   line-height: 1;
   letter-spacing: 0.04em;
   text-decoration: none;
   cursor: pointer;
-  overflow: hidden;
-  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
-  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+  filter:
+    drop-shadow(0 5px 0 var(--button-shadow))
+    drop-shadow(0 9px 12px rgba(0, 0, 0, 0.3));
+  transition: transform 120ms ease, filter 120ms ease;
 }
 
 .pixel-button::before {
   content: "";
   position: absolute;
-  top: -35%;
-  bottom: -35%;
-  left: -45%;
-  width: 28%;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(255, 245, 208, 0.42), transparent);
-  transform: skewX(-18deg);
-  transition: left 420ms ease;
+  z-index: -2;
+  inset: 0;
+  background: var(--button-edge);
+  clip-path: polygon(
+    6px 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    0 calc(100% - 6px),
+    0 6px
+  );
 }
 
-.pixel-button:hover::before,
-.pixel-button:focus-visible::before {
-  left: 118%;
+.pixel-button::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 2px;
+  pointer-events: none;
+  background: var(--button-bg);
+  clip-path: polygon(
+    4px 0,
+    calc(100% - 4px) 0,
+    100% 4px,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    4px 100%,
+    0 calc(100% - 4px),
+    0 4px
+  );
 }
 
 .pixel-button:hover {
-  filter: brightness(1.12);
   transform: translateY(-2px);
-  box-shadow: 0 0 0 3px #57351f, 0 8px 0 #3d2617, 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 24px rgba(255, 214, 107, 0.16);
+  filter:
+    brightness(1.1)
+    drop-shadow(0 7px 0 var(--button-shadow))
+    drop-shadow(0 13px 16px rgba(0, 0, 0, 0.36));
 }
 
 .pixel-button:active {
   transform: translateY(3px);
-  box-shadow: 0 0 0 3px #57351f, 0 2px 0 #3d2617;
+  filter:
+    brightness(1.02)
+    drop-shadow(0 2px 0 var(--button-shadow));
 }
 
 .pixel-button--small {
@@ -297,15 +335,15 @@ img {
 .pixel-button--dark {
   --button-bg: linear-gradient(180deg, #3d291d, #24160f);
   --button-color: var(--parchment-light);
-  border-color: var(--gold-deep);
-  box-shadow: 0 0 0 3px #130c09, 0 6px 0 #0e0906, inset 0 0 0 1px rgba(255, 214, 107, 0.12);
+  --button-edge: var(--gold-deep);
+  --button-shadow: #0e0906;
 }
 
 .pixel-button--ghost {
   --button-bg: rgba(23, 17, 13, 0.68);
   --button-color: #e5d7bd;
-  border-color: rgba(194, 139, 75, 0.65);
-  box-shadow: 0 0 0 2px rgba(36, 22, 15, 0.8), 0 5px 0 rgba(7, 5, 4, 0.85);
+  --button-edge: rgba(194, 139, 75, 0.72);
+  --button-shadow: rgba(7, 5, 4, 0.9);
 }
 
 .hero {
@@ -503,21 +541,62 @@ img {
 }
 
 .character-room {
+  --portrait-reveal-x: 70%;
+  --portrait-reveal-y: 70%;
+  --portrait-reveal-radius: 0px;
+  --portrait-reveal-feather: 0px;
   position: absolute;
   inset: 8% 9% 14%;
   overflow: hidden;
   border: 2px solid #5a3824;
   box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.45);
+  cursor: crosshair;
+  isolation: isolate;
+  transition:
+    --portrait-reveal-radius 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    --portrait-reveal-feather 220ms ease;
+}
+
+.character-room.is-revealing {
+  --portrait-reveal-radius: clamp(78px, 28%, 132px);
+  --portrait-reveal-feather: 12px;
 }
 
 .character-sprite {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
   object-position: 50% 32%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.character-photo {
+  z-index: 0;
+  image-rendering: auto;
+  filter: saturate(0.9) contrast(1.03) brightness(0.92);
+  transform: scale(1.002);
+}
+
+.character-pixel-portrait {
+  z-index: 1;
   image-rendering: pixelated;
   filter: saturate(0.88) contrast(1.04) brightness(0.92);
+  -webkit-mask-image: radial-gradient(
+    circle at var(--portrait-reveal-x) var(--portrait-reveal-y),
+    transparent 0 var(--portrait-reveal-radius),
+    #000 calc(var(--portrait-reveal-radius) + var(--portrait-reveal-feather))
+  );
+  mask-image: radial-gradient(
+    circle at var(--portrait-reveal-x) var(--portrait-reveal-y),
+    transparent 0 var(--portrait-reveal-radius),
+    #000 calc(var(--portrait-reveal-radius) + var(--portrait-reveal-feather))
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 .character-name {
@@ -1863,6 +1942,5 @@ img {
   .reveal { opacity: 1; transform: none; }
   .star-field { transform: none !important; }
   .star { animation: none !important; opacity: 0.58; transform: none; }
-  .pixel-button::before { display: none; }
   .footer-campfire { animation: none !important; filter: drop-shadow(0 0 8px rgba(255, 190, 68, 0.42)); transform: none; }
 }
