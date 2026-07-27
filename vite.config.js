@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
 
-// https://vitejs.dev/config/
 export default defineConfig({
-    base: './',
-    build: {
-        minify: 'terser',}
-        
+  base: "./",
+  build: {
+    minify: "terser",
+    target: "es2020",
+  },
 });

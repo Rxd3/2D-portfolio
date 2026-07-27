@@ -21,7 +21,7 @@ let parallaxFrame = null;
 function createStarField() {
   if (!starField) return;
 
-  const starCount = compactStarsQuery.matches ? 100 : 300;
+  const starCount = compactStarsQuery.matches ? 70 : 180;
   const stars = document.createDocumentFragment();
 
   for (let index = 0; index < starCount; index += 1) {
@@ -83,11 +83,23 @@ portraitReveals.forEach((portrait) => {
     const bounds = portrait.getBoundingClientRect();
     const revealX = Math.min(Math.max(event.clientX - bounds.left, 0), bounds.width);
     const revealY = Math.min(Math.max(event.clientY - bounds.top, 0), bounds.height);
+    const normalizedX = (revealX - bounds.width / 2) / (bounds.width / 2);
+    const normalizedY = (revealY - bounds.height / 2) / (bounds.height / 2);
+    const cornerDistance = Math.min(
+      Math.hypot(normalizedX, normalizedY) / Math.SQRT2,
+      1,
+    );
+    const shortestSide = Math.min(bounds.width, bounds.height);
+    const centerRadius = shortestSide * 0.44;
+    const cornerRadius = shortestSide * 0.14;
+    const radius = centerRadius
+      - (centerRadius - cornerRadius) * (cornerDistance ** 1.35);
 
     if (portraitFrame) cancelAnimationFrame(portraitFrame);
     portraitFrame = requestAnimationFrame(() => {
       portrait.style.setProperty("--portrait-reveal-x", `${revealX.toFixed(1)}px`);
       portrait.style.setProperty("--portrait-reveal-y", `${revealY.toFixed(1)}px`);
+      portrait.style.setProperty("--portrait-reveal-target-radius", `${radius.toFixed(1)}px`);
       portraitFrame = null;
     });
   };
@@ -270,6 +282,7 @@ const revealObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
+      entry.target.classList.remove("is-pending");
       entry.target.classList.add("is-visible");
       revealObserver.unobserve(entry.target);
     });
@@ -279,6 +292,7 @@ const revealObserver = new IntersectionObserver(
 
 document.querySelectorAll("main section").forEach((section) => {
   section.querySelectorAll(".reveal").forEach((element, index) => {
+    element.classList.add("is-pending");
     element.style.setProperty("--reveal-delay", `${Math.min(index * 70, 280)}ms`);
     revealObserver.observe(element);
   });
