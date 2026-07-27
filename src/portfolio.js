@@ -225,6 +225,23 @@ window.addEventListener("portfolio:first-move", () => {
   gameNote?.classList.add("is-dismissed");
 }, { once: true });
 
+document.querySelectorAll("[data-project-toggle]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const detailId = button.getAttribute("aria-controls");
+    const detail = detailId ? document.getElementById(detailId) : null;
+    if (!detail) return;
+
+    const willOpen = button.getAttribute("aria-expanded") !== "true";
+    button.setAttribute("aria-expanded", String(willOpen));
+    detail.hidden = !willOpen;
+
+    const label = button.querySelector(".project-detail-label");
+    const symbol = button.querySelector(".project-detail-symbol");
+    if (label) label.textContent = willOpen ? "Less Details" : "More Details";
+    if (symbol) symbol.textContent = willOpen ? "−" : "+";
+  });
+});
+
 document.querySelectorAll("[data-accordion] .experience-item > button").forEach((button) => {
   button.addEventListener("click", () => {
     const item = button.closest(".experience-item");
