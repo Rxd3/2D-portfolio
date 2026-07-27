@@ -1,17 +1,34 @@
 import { k } from "./kaBoomCtx";
-import { scaleFactor } from "./constants";
-import { displayDialogue } from "./utils";
-import { setCamScale } from "./utils";
-import { dialogueData } from "./constants";
+import { dialogueData, scaleFactor } from "./constants";
+import { displayDialogue, setCamScale } from "./utils";
 import "./styles.css";
 import "./portfolio";
 
 const passThroughBoundaryIds = new Set([36]);
+const movementKeyAliases = new Map([
+    ["w", "up"],
+    ["arrowup", "up"],
+    ["s", "down"],
+    ["arrowdown", "down"],
+    ["a", "left"],
+    ["arrowleft", "left"],
+    ["d", "right"],
+    ["arrowright", "right"],
+]);
+const pressedMovementKeys = new Set();
+const pointerInput = {
+    isDown: false,
+    pointerId: null,
+    target: null,
+    stuckFrames: 0,
+};
+const pointerStopDistance = 8;
+const pointerStuckFrameLimit = 10;
 
 k.setBackground(k.Color.fromHex("#1e0022"));
-k.loadSprite("map", "./map1.png", );
-k.loadSprite("door", "sprites/door.png");
-k.loadSprite("point-of-interest", "sprites/pointofIntrest.png", {
+k.loadSprite("map", "./map1.png");
+k.loadSprite("door", "./sprites/door.png");
+k.loadSprite("point-of-interest", "./sprites/pointofIntrest.png", {
     sliceX: 2,
     sliceY: 2,
     anims: {
@@ -19,7 +36,7 @@ k.loadSprite("point-of-interest", "sprites/pointofIntrest.png", {
     },
 });
 
-k.loadSprite("player", "sprites/player (3).png", {
+k.loadSprite("player", "./sprites/player (3).png", {
     sliceX: 6,
     sliceY: 10,
     anims: {
@@ -31,22 +48,113 @@ k.loadSprite("player", "sprites/player (3).png", {
         "walk-up": { from: 30, to: 35, speed: 8, loop: true },
     },
 });
-k.scene("main",async() => {
-    const mapData = await (await fetch("./map.json")).json()
+
+function getKeyboardMovement() {
+    return k.vec2(
+        Number(isMovementDirectionPressed("right")) - Number(isMovementDirectionPressed("left")),
+        Number(isMovementDirectionPressed("down")) - Number(isMovementDirectionPressed("up")),
+    );
+}
+
+function isMovementDirectionPressed(direction) {
+    for (const key of pressedMovementKeys) {
+        if (movementKeyAliases.get(key) === direction) return true;
+    }
+
+    return false;
+}
+
+function playIdleAnimation(player) {
+    const idleAnimation = player.direction === "down"
+        ? "idle-down"
+        : player.direction === "up"
+            ? "idle-up"
+            : "idle-side";
+
+    if (player.curAnim() !== idleAnimation) player.play(idleAnimation);
+}
+
+function playMovementAnimation(player, movement) {
+    if (Math.abs(movement.x) > Math.abs(movement.y)) {
+        player.flipX = movement.x < 0;
+        if (player.curAnim() !== "walk-side") player.play("walk-side");
+        player.direction = movement.x < 0 ? "left" : "right";
+        return;
+    }
+
+    if (movement.y < 0) {
+        if (player.curAnim() !== "walk-up") player.play("walk-up");
+        player.direction = "up";
+        return;
+    }
+
+    if (movement.y > 0) {
+        if (player.curAnim() !== "walk-down") player.play("walk-down");
+        player.direction = "down";
+    }
+}
+
+function clearPointerTarget() {
+    pointerInput.isDown = false;
+    pointerInput.pointerId = null;
+    pointerInput.target = null;
+    pointerInput.stuckFrames = 0;
+}
+
+function stopPlayer(player) {
+    pressedMovementKeys.clear();
+    clearPointerTarget();
+    player.isKeyboardMoving = false;
+    player.isPointerMoving = false;
+    playIdleAnimation(player);
+}
+
+function markPlayerMoved(player) {
+    if (player.hasMoved) return;
+
+    player.hasMoved = true;
+    window.dispatchEvent(new CustomEvent("portfolio:first-move"));
+}
+
+function isGameOpen() {
+    return document.querySelector("[data-game-overlay]")?.classList.contains("is-open") ?? false;
+}
+
+document.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if (!movementKeyAliases.has(key) || event.repeat || !isGameOpen()) return;
+
+    clearPointerTarget();
+    pressedMovementKeys.add(key);
+});
+
+document.addEventListener("keyup", (event) => {
+    pressedMovementKeys.delete(event.key.toLowerCase());
+});
+
+k.scene("main", async () => {
+    const mapResponse = await fetch("./map.json");
+    if (!mapResponse.ok) throw new Error(`Unable to load map data (${mapResponse.status})`);
+
+    const mapData = await mapResponse.json();
     const layers = mapData.layers;
     const tileChunks = layers
         .filter((layer) => layer.type === "tilelayer" && layer.chunks)
         .flatMap((layer) => layer.chunks);
+
+    if (tileChunks.length === 0) throw new Error("The map does not contain any tile chunks.");
+
     const mapOffset = k.vec2(
         -Math.min(...tileChunks.map((chunk) => chunk.x)) * mapData.tilewidth,
         -Math.min(...tileChunks.map((chunk) => chunk.y)) * mapData.tileheight,
     );
-    
+
     const map = k.add([
         k.sprite("map"),
         k.pos(0),
         k.scale(scaleFactor),
     ]);
+
     k.add([
         k.sprite("door"),
         k.pos(0),
@@ -56,8 +164,8 @@ k.scene("main",async() => {
     ]);
 
     const player = k.make([
-        k.sprite("player", {anim: "idle-down"}),
-        k.area({shape: new k.Rect(k.vec2(0, 16), 10, 6)}),
+        k.sprite("player", { anim: "idle-down" }),
+        k.area({ shape: new k.Rect(k.vec2(0, 16), 10, 6) }),
         k.body(),
         k.anchor("center"),
         k.pos(),
@@ -68,162 +176,209 @@ k.scene("main",async() => {
             direction: "down",
             isInDialogue: false,
             isKeyboardMoving: false,
+            isPointerMoving: false,
+            hasMoved: false,
             activeDialogue: null,
             closeDialogue: null,
         },
         "player",
     ]);
+    const dialogueLocks = new Set();
+    let playerAdded = false;
 
     for (const layer of layers) {
         if (layer.name === "boundaries") {
             for (const boundary of layer.objects) {
+                const boundaryTag = boundary.name || `boundary-${boundary.id}`;
+
                 map.add([
-                    k.area({shape: new k.Rect(k.vec2(0), boundary.width, boundary.height)}),
+                    k.area({ shape: new k.Rect(k.vec2(0), boundary.width, boundary.height) }),
                     ...(!passThroughBoundaryIds.has(boundary.id)
-                        ? [k.body({isStatic: true})]
+                        ? [k.body({ isStatic: true })]
                         : []),
                     k.pos(boundary.x + mapOffset.x, boundary.y + mapOffset.y),
-                    boundary.name
+                    boundaryTag,
                 ]);
 
                 const dialogueText = dialogueData[boundary.name];
-                if (dialogueText) {
-                    k.add([
-                        k.sprite("point-of-interest", { anim: "pulse" }),
-                        k.pos(
-                            (boundary.x + boundary.width / 2 - 3.5 + mapOffset.x) * scaleFactor,
-                            (boundary.y - 24 + mapOffset.y) * scaleFactor,
-                        ),
-                        k.scale(scaleFactor),
-                        k.z(3),
-                        "point-of-interest",
-                    ]);
+                if (!dialogueText) continue;
 
-                    player.onCollide(boundary.name, () => {
-                        if (player.activeDialogue === boundary.name) return;
+                k.add([
+                    k.sprite("point-of-interest", { anim: "pulse" }),
+                    k.pos(
+                        (boundary.x + boundary.width / 2 - 3.5 + mapOffset.x) * scaleFactor,
+                        (boundary.y - 24 + mapOffset.y) * scaleFactor,
+                    ),
+                    k.scale(scaleFactor),
+                    k.z(3),
+                    "point-of-interest",
+                ]);
 
-                        player.closeDialogue?.();
-                        player.activeDialogue = boundary.name;
-                        player.isInDialogue = true;
-                        player.closeDialogue = displayDialogue(dialogueText, () => {
-                            if (player.activeDialogue !== boundary.name) return;
+                player.onCollide(boundaryTag, () => {
+                    if (dialogueLocks.has(boundaryTag) || player.activeDialogue === boundaryTag) return;
 
-                            player.isInDialogue = false;
-                            player.activeDialogue = null;
-                            player.closeDialogue = null;
-                        });
+                    player.closeDialogue?.();
+                    stopPlayer(player);
+                    dialogueLocks.add(boundaryTag);
+                    player.activeDialogue = boundaryTag;
+                    player.isInDialogue = true;
+                    player.closeDialogue = displayDialogue(dialogueText, () => {
+                        if (player.activeDialogue !== boundaryTag) return;
+
+                        player.isInDialogue = false;
+                        player.activeDialogue = null;
+                        player.closeDialogue = null;
                     });
+                });
 
-                    player.onCollideEnd(boundary.name, () => {
-                        if (player.activeDialogue === boundary.name) {
-                            player.closeDialogue?.();
-                        }
-                    });
-                }
-                
+                player.onCollideEnd(boundaryTag, () => {
+                    dialogueLocks.delete(boundaryTag);
+                    if (player.activeDialogue === boundaryTag) player.closeDialogue?.();
+                });
             }
             continue;
         }
-        if (layer.name === "spawnpoint") {
-            for (const entity of layer.objects) {
-                if (entity.name === "player") {
-                    player.pos = map.pos.add(
-                        k.vec2(
-                            entity.x + mapOffset.x,
-                            entity.y + mapOffset.y,
-                        ).scale(scaleFactor),
-                    );
-                    k.add (player);
-                    continue;
-                }
-            }
+
+        if (layer.name !== "spawnpoint") continue;
+
+        for (const entity of layer.objects) {
+            if (entity.name !== "player") continue;
+
+            player.pos = map.pos.add(
+                k.vec2(
+                    entity.x + mapOffset.x,
+                    entity.y + mapOffset.y,
+                ).scale(scaleFactor),
+            );
+            k.add(player);
+            playerAdded = true;
+            break;
         }
     }
+
+    if (!playerAdded) throw new Error("The map is missing a player spawn point.");
+
     setCamScale(k);
-    k.onResize(() => {setCamScale(k)});
+    k.onResize(() => setCamScale(k));
 
-    k.onUpdate(() => {
-        k.camPos(player.pos.x ,player.pos.y +100);
+    const gameCanvas = document.getElementById("game");
 
-        const movement = k.vec2(
-            Number(k.isKeyDown("d")) - Number(k.isKeyDown("a")),
-            Number(k.isKeyDown("s")) - Number(k.isKeyDown("w")),
+    function updatePointerTarget(event) {
+        if (!gameCanvas) return;
+
+        const bounds = gameCanvas.getBoundingClientRect();
+        const screenPosition = k.vec2(
+            (event.clientX - bounds.left) * (k.width() / bounds.width),
+            (event.clientY - bounds.top) * (k.height() / bounds.height),
         );
 
-        if (movement.x === 0 && movement.y === 0) {
-            if (player.isKeyboardMoving) {
-                player.isKeyboardMoving = false;
-                if (player.direction === "down") player.play("idle-down");
-                else if (player.direction === "up") player.play("idle-up");
-                else player.play("idle-side");
-            }
-            return;
-        }
+        pointerInput.target = k.toWorld(screenPosition);
+        pointerInput.stuckFrames = 0;
+    }
 
-        player.isKeyboardMoving = true;
-        player.move(movement.unit().scale(player.speed));
+    gameCanvas?.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || !isGameOpen()) return;
 
-        if (movement.x !== 0) {
-            player.flipX = movement.x < 0;
-            if (player.curAnim() !== "walk-side") player.play("walk-side");
-            player.direction = movement.x < 0 ? "left" : "right";
-        } else if (movement.y < 0) {
-            if (player.curAnim() !== "walk-up") player.play("walk-up");
-            player.direction = "up";
-        } else if (movement.y > 0) {
-            if (player.curAnim() !== "walk-down") player.play("walk-down");
-            player.direction = "down";
+        event.preventDefault();
+        pressedMovementKeys.clear();
+        pointerInput.isDown = true;
+        pointerInput.pointerId = event.pointerId;
+        updatePointerTarget(event);
+        gameCanvas.setPointerCapture?.(event.pointerId);
+    });
+
+    gameCanvas?.addEventListener("pointermove", (event) => {
+        if (!pointerInput.isDown || event.pointerId !== pointerInput.pointerId) return;
+        updatePointerTarget(event);
+    });
+
+    window.addEventListener("pointerup", (event) => {
+        if (event.pointerId !== pointerInput.pointerId) return;
+
+        pointerInput.isDown = false;
+        pointerInput.pointerId = null;
+        if (gameCanvas?.hasPointerCapture?.(event.pointerId)) {
+            gameCanvas.releasePointerCapture(event.pointerId);
         }
     });
-    k.onMouseDown((MouseBtn) => {
-        if (MouseBtn !== "left") return;
-        const WorldMousePos = k.toWorld(k.mousePos());
-        player.moveTo(WorldMousePos, player.speed);
 
-        const mouseAngle = player.pos.angle(WorldMousePos);
+    window.addEventListener("pointercancel", clearPointerTarget);
 
-        const lowerBound = 50;
-        const upperBound = 125;
+    k.onUpdate(() => {
+        k.camPos(player.pos.x, player.pos.y + 100);
 
-        if (mouseAngle >= lowerBound && mouseAngle < upperBound && player.curAnim() !== "walk-up") {
-            player.play("walk-up");
-            player.direction = "up";
+        if (!isGameOpen()) {
+            stopPlayer(player);
             return;
         }
-        if (Math.abs(mouseAngle) >= upperBound ) {
-            player.flipX=false;
-            if (player.curAnim() !== "walk-side") {
-                player.play("walk-side");
+
+        const movement = getKeyboardMovement();
+
+        if (movement.x !== 0 || movement.y !== 0) {
+            const dialogueWasOpen = player.isInDialogue;
+            pointerInput.target = null;
+            pointerInput.stuckFrames = 0;
+            player.isKeyboardMoving = true;
+            player.isPointerMoving = false;
+            player.move(movement.unit().scale(player.speed));
+
+            if (!dialogueWasOpen && player.isInDialogue) {
+                stopPlayer(player);
+                return;
             }
-            player.direction = "right";
+
+            playMovementAnimation(player, movement);
+            markPlayerMoved(player);
             return;
         }
-        if (mouseAngle >= -upperBound && mouseAngle < -lowerBound && player.curAnim() !== "walk-down") {
-            player.play("walk-down");
-            player.direction = "down";
-            return;
-        }
-         if (Math.abs(mouseAngle) < lowerBound ) {
-            player.flipX=true;
-            if (player.curAnim() !== "walk-side") {
-                player.play("walk-side");
+
+        player.isKeyboardMoving = false;
+
+        if (!pointerInput.target) {
+            if (player.isPointerMoving) {
+                player.isPointerMoving = false;
+                playIdleAnimation(player);
             }
-            player.direction = "left";
-            return;}
-      
+            return;
+        }
+
+        const pointerMovement = pointerInput.target.sub(player.pos);
+        if (pointerMovement.len() <= pointerStopDistance) {
+            clearPointerTarget();
+            player.isPointerMoving = false;
+            playIdleAnimation(player);
+            return;
+        }
+
+        const dialogueWasOpen = player.isInDialogue;
+        const previousPosition = player.pos.clone();
+        player.isPointerMoving = true;
+        player.moveTo(pointerInput.target, player.speed);
+
+        if (!dialogueWasOpen && player.isInDialogue) {
+            stopPlayer(player);
+            return;
+        }
+
+        pointerInput.stuckFrames = previousPosition.dist(player.pos) < 0.25
+            ? pointerInput.stuckFrames + 1
+            : 0;
+
+        if (pointerInput.stuckFrames >= pointerStuckFrameLimit) {
+            clearPointerTarget();
+            player.isPointerMoving = false;
+            playIdleAnimation(player);
+            return;
+        }
+
+        playMovementAnimation(player, pointerMovement);
+        markPlayerMoved(player);
     });
-    k.onMouseRelease(() => {
-        if (player.isKeyboardMoving) return;
 
-        if (player.direction === "down"){
-            player.play("idle-down");
-            return;
-        }
-        if (player.direction === "up"){
-            player.play("idle-up");
-            return;
-        }
-        player.play("idle-side");
+    window.addEventListener("blur", () => stopPlayer(player));
+    window.addEventListener("portfolio:house-close", () => {
+        player.closeDialogue?.();
+        stopPlayer(player);
     });
 });
 

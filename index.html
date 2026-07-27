@@ -61,7 +61,7 @@
         <div class="section-shell about-grid">
           <div class="character-card reveal" aria-hidden="true">
             <div class="character-room">
-              <img class="character-sprite" src="./rasit-pixel-portrait.png" alt="" />
+              <img class="character-sprite" src="./rasit-pixel-portrait.png" width="1122" height="1402" alt="" />
             </div>
             <span class="character-name">Character profile · Rasit</span>
           </div>
@@ -95,11 +95,11 @@
             <div class="room-label room-label--software"><strong>Office</strong><span>Software Projects</span></div>
             <div class="room-label room-label--experience"><strong>Kitchen</strong><span>Experience</span></div>
             <div class="room-label room-label--contact"><strong>Mailbox</strong><span>Contact</span></div>
-            <img src="./map1.png" alt="Full map of the interactive portfolio house, including living room, garage, lab, office, kitchen, and contact room" />
+            <img src="./map1.png" width="768" height="768" alt="Full map of the interactive portfolio house, including living room, garage, lab, office, kitchen, and contact room" />
           </div>
           <div class="centered-action reveal">
             <button class="pixel-button pixel-button--large" type="button" data-enter-house>Enter the House <span aria-hidden="true">→</span></button>
-            <span>Use WASD, arrow keys, or click where you want to go.</span>
+            <span>Use WASD, arrow keys, or click/tap where you want to move.</span>
           </div>
         </div>
       </section>
@@ -173,16 +173,16 @@
           </div>
           <div class="quest-board reveal" data-accordion>
             <article class="experience-item is-open">
-              <button type="button" aria-expanded="true"><span class="expand-icon" aria-hidden="true">−</span><time>2026</time><strong>Verification & System Test</strong><em>Fusion MCU · TEKNOFEST Team</em></button>
-              <div class="experience-detail"><p>Developing verification planning, self-checking testbenches, UART/GPIO testing, AXI-Lite peripheral validation, and RISC-V core verification strategy.</p></div>
+              <button type="button" aria-expanded="true" aria-controls="experience-fusion"><span class="expand-icon" aria-hidden="true">−</span><time>2026</time><strong>Verification & System Test</strong><em>Fusion MCU · TEKNOFEST Team</em></button>
+              <div class="experience-detail" id="experience-fusion" aria-hidden="false"><p>Developing verification planning, self-checking testbenches, UART/GPIO testing, AXI-Lite peripheral validation, and RISC-V core verification strategy.</p></div>
             </article>
             <article class="experience-item">
-              <button type="button" aria-expanded="false"><span class="expand-icon" aria-hidden="true">+</span><time>2025</time><strong>Automation & Lead Systems</strong><em>Pwrlink Marketing Agency</em></button>
-              <div class="experience-detail"><p>Built n8n automation workflows and a lead-generation system that collected more than 5,000 prospects and supported AI-personalized outreach.</p></div>
+              <button type="button" aria-expanded="false" aria-controls="experience-pwrlink"><span class="expand-icon" aria-hidden="true">+</span><time>2025</time><strong>Automation & Lead Systems</strong><em>Pwrlink Marketing Agency</em></button>
+              <div class="experience-detail" id="experience-pwrlink" aria-hidden="true"><p>Built n8n automation workflows and a lead-generation system that collected more than 5,000 prospects and supported AI-personalized outreach.</p></div>
             </article>
             <article class="experience-item">
-              <button type="button" aria-expanded="false"><span class="expand-icon" aria-hidden="true">+</span><time>2022—Now</time><strong>Judge & Coordinator</strong><em>RoboZone</em></button>
-              <div class="experience-detail"><p>Evaluated 200+ robotics and programming projects across four annual international school competitions.</p></div>
+              <button type="button" aria-expanded="false" aria-controls="experience-robozone"><span class="expand-icon" aria-hidden="true">+</span><time>2022—Now</time><strong>Judge & Coordinator</strong><em>RoboZone</em></button>
+              <div class="experience-detail" id="experience-robozone" aria-hidden="true"><p>Evaluated 200+ robotics and programming projects across four annual international school competitions.</p></div>
             </article>
           </div>
         </div>
@@ -247,20 +247,20 @@
       <div class="footer-links"><a href="https://github.com/Rxd3" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/rasit-isaoglu-538577322" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:Resitisaoglu@gmail.com">Email</a></div>
     </footer>
 
-    <aside class="game-overlay" aria-hidden="true" data-game-overlay>
+    <aside class="game-overlay" role="dialog" aria-modal="true" aria-labelledby="game-title" aria-hidden="true" data-game-overlay>
       <div class="game-toolbar">
-        <div><span class="game-status-dot" aria-hidden="true"></span><strong>Portfolio House</strong><small>Explore the glowing markers</small></div>
-        <p>Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or click</p>
+        <div><span class="game-status-dot" aria-hidden="true"></span><strong id="game-title">Portfolio House</strong><small>Explore the glowing markers</small></div>
+        <p class="game-controls" id="game-controls">Move with <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>, arrow keys, or click/tap</p>
         <button type="button" data-close-house>Exit House <span aria-hidden="true">×</span></button>
       </div>
       <div id="game-app">
         <div id="ui">
-          <p class="game-note">Find the glowing markers to discover my work.</p>
-          <div id="textbox-container" hidden>
-            <div id="textbox"><p id="dialog" class="ui-text"></p><div class="btn-container"><button id="close" class="ui-close-btn">Continue exploring</button></div></div>
+          <p class="game-note" data-game-note>Move with WASD, arrow keys, or click/tap. Find the glowing markers.</p>
+          <div id="textbox-container" role="dialog" aria-label="Portfolio information" hidden>
+            <div id="textbox"><p id="dialog" class="ui-text"></p><div class="btn-container"><span class="dialogue-hint">Walk away to close</span><button id="close" class="ui-close-btn">Continue exploring</button></div></div>
           </div>
         </div>
-        <canvas id="game"></canvas>
+        <canvas id="game" tabindex="0" aria-label="Interactive pixel-art portfolio house" aria-describedby="game-controls"></canvas>
       </div>
     </aside>
 

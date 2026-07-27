@@ -8,8 +8,11 @@ const contactForm = document.querySelector("[data-contact-form]");
 const formStatus = document.querySelector("[data-form-status]");
 const hero = document.querySelector(".hero");
 const starField = document.querySelector(".star-field");
+const gameNote = document.querySelector("[data-game-note]");
+const backgroundElements = document.querySelectorAll("body > header, body > main, body > footer");
 const compactStarsQuery = window.matchMedia("(max-width: 780px)");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const movementKeys = new Set(["w", "a", "s", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"]);
 
 let previousFocus = null;
 let parallaxFrame = null;
@@ -87,21 +90,43 @@ function toggleMenu() {
   menuToggle?.setAttribute("aria-expanded", String(isOpen));
 }
 
+function setBackgroundInert(isInert) {
+  backgroundElements.forEach((element) => {
+    element.inert = isInert;
+  });
+}
+
+function getOverlayFocusableElements() {
+  if (!overlay) return [];
+
+  return [...overlay.querySelectorAll('a[href], button:not([disabled]), canvas[tabindex], [tabindex]:not([tabindex="-1"])')]
+    .filter((element) => element.getClientRects().length > 0);
+}
+
 function openHouse(event) {
+  if (!overlay) return;
+
   previousFocus = event?.currentTarget ?? document.activeElement;
-  overlay?.classList.add("is-open");
-  overlay?.setAttribute("aria-hidden", "false");
+  overlay.classList.add("is-open");
+  overlay.setAttribute("aria-hidden", "false");
   document.body.classList.add("game-open");
+  setBackgroundInert(true);
   closeMenu();
-  closeHouseButton?.focus();
+  requestAnimationFrame(() => closeHouseButton?.focus({ preventScroll: true }));
   window.dispatchEvent(new Event("resize"));
+  window.dispatchEvent(new CustomEvent("portfolio:house-open"));
 }
 
 function closeHouse() {
-  overlay?.classList.remove("is-open");
-  overlay?.setAttribute("aria-hidden", "true");
+  if (!overlay?.classList.contains("is-open")) return;
+
+  window.dispatchEvent(new CustomEvent("portfolio:house-close"));
+  setBackgroundInert(false);
+  overlay.classList.remove("is-open");
+  overlay.setAttribute("aria-hidden", "true");
   document.body.classList.remove("game-open");
-  previousFocus?.focus?.();
+  previousFocus?.focus?.({ preventScroll: true });
+  previousFocus = null;
 }
 
 menuToggle?.addEventListener("click", toggleMenu);
@@ -112,10 +137,60 @@ window.addEventListener("scroll", setHeaderState, { passive: true });
 setHeaderState();
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && overlay?.classList.contains("is-open")) {
+  const isHouseOpen = overlay?.classList.contains("is-open");
+
+  if (isHouseOpen && movementKeys.has(event.key.toLowerCase())) {
+    event.preventDefault();
+  }
+
+  if (event.key === "Escape" && isHouseOpen) {
+    const openDialogueButton = document.querySelector("#textbox-container:not([hidden]) #close");
+    if (openDialogueButton) {
+      openDialogueButton.click();
+      return;
+    }
+
     closeHouse();
+    return;
+  }
+
+  if (event.key === "Escape") {
+    closeMenu();
+    return;
+  }
+
+  if (event.key !== "Tab" || !isHouseOpen) return;
+
+  const focusableElements = getOverlayFocusableElements();
+  if (focusableElements.length === 0) {
+    event.preventDefault();
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements.at(-1);
+
+  if (event.shiftKey && document.activeElement === firstElement) {
+    event.preventDefault();
+    lastElement.focus();
+  } else if (!event.shiftKey && document.activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
   }
 });
+
+document.addEventListener("pointerdown", (event) => {
+  if (!header?.classList.contains("is-menu-open") || header.contains(event.target)) return;
+  closeMenu();
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth > 780) closeMenu();
+}, { passive: true });
+
+window.addEventListener("portfolio:first-move", () => {
+  gameNote?.classList.add("is-dismissed");
+}, { once: true });
 
 document.querySelectorAll("[data-accordion] .experience-item > button").forEach((button) => {
   button.addEventListener("click", () => {
@@ -126,6 +201,7 @@ document.querySelectorAll("[data-accordion] .experience-item > button").forEach(
     accordion?.querySelectorAll(".experience-item").forEach((entry) => {
       entry.classList.remove("is-open");
       entry.querySelector("button")?.setAttribute("aria-expanded", "false");
+      entry.querySelector(".experience-detail")?.setAttribute("aria-hidden", "true");
       const icon = entry.querySelector(".expand-icon");
       if (icon) icon.textContent = "+";
     });
@@ -133,6 +209,7 @@ document.querySelectorAll("[data-accordion] .experience-item > button").forEach(
     if (willOpen) {
       item?.classList.add("is-open");
       button.setAttribute("aria-expanded", "true");
+      item?.querySelector(".experience-detail")?.setAttribute("aria-hidden", "false");
       const icon = button.querySelector(".expand-icon");
       if (icon) icon.textContent = "−";
     }
@@ -187,6 +264,6 @@ contactForm?.addEventListener("submit", (event) => {
   const subject = encodeURIComponent(`Portfolio message from ${name}`);
   const body = encodeURIComponent(`${message}\n\nFrom: ${name}\nEmail: ${email}`);
 
-  formStatus.textContent = "Your letter is ready — opening your email app…";
+  if (formStatus) formStatus.textContent = "Your letter is ready — opening your email app…";
   window.location.href = `mailto:Resitisaoglu@gmail.com?subject=${subject}&body=${body}`;
 });
