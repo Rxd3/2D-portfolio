@@ -237,6 +237,42 @@ window.addEventListener("portfolio:first-move", () => {
   gameNote?.classList.add("is-dismissed");
 }, { once: true });
 
+document.querySelectorAll("[data-project-tabs]").forEach((tabGroup) => {
+  const tabs = [...tabGroup.querySelectorAll('[role="tab"]')];
+  const panels = [...tabGroup.querySelectorAll('[role="tabpanel"]')];
+
+  const activateTab = (nextTab, shouldFocus = false) => {
+    tabs.forEach((tab) => {
+      const isActive = tab === nextTab;
+      tab.classList.toggle("is-active", isActive);
+      tab.setAttribute("aria-selected", String(isActive));
+      tab.tabIndex = isActive ? 0 : -1;
+    });
+
+    panels.forEach((panel) => {
+      panel.hidden = panel.id !== nextTab.getAttribute("aria-controls");
+    });
+
+    if (shouldFocus) nextTab.focus();
+  };
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => activateTab(tab));
+    tab.addEventListener("keydown", (event) => {
+      let nextIndex = index;
+
+      if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+      else if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+      else if (event.key === "Home") nextIndex = 0;
+      else if (event.key === "End") nextIndex = tabs.length - 1;
+      else return;
+
+      event.preventDefault();
+      activateTab(tabs[nextIndex], true);
+    });
+  });
+});
+
 document.querySelectorAll("[data-project-toggle]").forEach((button) => {
   button.addEventListener("click", () => {
     const detailId = button.getAttribute("aria-controls");
